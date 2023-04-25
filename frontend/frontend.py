@@ -43,23 +43,24 @@ st.markdown(
 )
 
 # First section (row)
-st.markdown("#### Choisir une action")
+st.markdown("#### 1 - Que voulez vous afficher ?")
 
 
 # Make page
 option = st.selectbox(
-    " 1 - Que voulez vous afficher ?",
+    "Choisir une action:",
     (
         "---",
-        "la prédiction du statut du client",
+        "Décision d'attribution d'un prêt",
         "les graphiques de l'importance globale",
     ),
 )
 
 
 # Saisie
-if option == "la prédiction du statut du client":
-    st.write(" 2 - Saisir un numéro client pour la prédiction")
+if option == "Décision d'attribution d'un prêt":
+
+    st.markdown("#### 2 - Saisir un numéro client pour la prédiction")
 
     client_id_input = st.text_input("Indiquez le numéro du client:", value="")
 
@@ -74,7 +75,8 @@ if option == "la prédiction du statut du client":
     all_clients = all_clients["values"].to_list()
 
     # bouton prédire
-    st.caption("NB: Numéro compris entre _100002_ et _456255_")
+    st.caption("NB: Il s'agit d'un numéro à 6 chiffres")
+    st.markdown("#### 3 - Exécuter la prédiction")
     if st.button("Prédire"):
         if client_id_input == "" or client_id_input.isalpha():
             st.error("Saisir un numéro client")
@@ -96,6 +98,7 @@ if option == "la prédiction du statut du client":
             # Logiques pour la prédiction
             if pred_str_format == "Prêt accordé, client sûr":
                 st.success(pred_str_format, icon="✅")
+                st.write("Il s'agit de la décision automatique obtenue en fonction du croisement de plusieurs variables détaillées ci-dessous.")
 
                 # CONVOQUER L'ENDPOINT DE LA FEATURE IMPORTANCE
                 # importance = requests.post(url="http://localhost:8000/importance_locale", params=inputs)
@@ -113,8 +116,9 @@ if option == "la prédiction du statut du client":
                     unsafe_allow_html=True,
                 )
                 # Utilisation de plotly
-                fig = px.histogram(
-                    plot_importance, x="Feature", y="Contribution?", title=""
+                fig = px.bar(
+                    plot_importance, x="Feature", y="Contribution?", title="", color = "Contribution?",
+                    color_continuous_scale=["red", "green"]
                 )
                 st.plotly_chart(fig, use_container_width=True)
                 st.markdown(
@@ -127,16 +131,18 @@ if option == "la prédiction du statut du client":
                 st.write(" ")
                 st.write(" ")
                 st.write(
-                    "Vous pouvez filtrer le tableau ci-dessous pour connaître en détail l'importance de chaque variable sur la prédiction effectuée pour ce client"
+                    "Vous pouvez filtrer et agrandir en plein écran le tableau ci-dessous pour connaître en détail l'importance de chaque variable sur la prédiction effectuée pour ce client"
                 )
                 st.dataframe(plot_importance.iloc[:, :2], use_container_width=True)
                 st.markdown(
-                    "<h6 style='text-align: center; color: black;'> Tableau 1 : Tableau de l'importance locale </h6>",
+                    "<h6 style='text-align: center; color: black;'> Tableau 1 : Tableau de l'importance locale des variables sur la prédiction </h6>",
                     unsafe_allow_html=True,
                 )
 
             elif pred_str_format == "Prêt non accordé, risque de défaut":
                 st.warning(pred_str_format, icon="⚠️")
+                st.write("Il s'agit de la décision automatique obtenue en fonction du croisement de plusieurs variables détaillées ci-dessous.")
+                
 
                 # CONVOQUER L'ENDPOINT DE LA FEATURE IMPORTANCE
                 # importance = requests.post(url="http://localhost:8000/importance_locale", params=inputs)
@@ -154,7 +160,8 @@ if option == "la prédiction du statut du client":
                     unsafe_allow_html=True,
                 )
                 # Utilisation de plotly
-                fig = px.bar(plot_importance, x="Feature", y="Contribution?", title="")
+                fig = px.bar(plot_importance, x="Feature", y="Contribution?", title="", color = "Contribution?",
+                    color_continuous_scale=["red", "green"])
                 st.plotly_chart(fig, use_container_width=True)
 
                 st.markdown(
@@ -168,7 +175,7 @@ if option == "la prédiction du statut du client":
                 st.write(" ")
                 st.write(" ")
                 st.write(
-                    "Vous pouvez filtrer le tableau ci-dessous pour connaître en détail l'importance de chaque variable sur la prédiction effectuée pour ce client"
+                    "Vous pouvez filtrer et agrandir en plein écran le tableau ci-dessous pour connaître en détail l'importance de chaque variable sur la prédiction effectuée pour ce client"
                 )
                 st.dataframe(plot_importance.iloc[:, :2], use_container_width=True)
                 st.markdown(
@@ -197,7 +204,8 @@ if option == "les graphiques de l'importance globale":
         unsafe_allow_html=True,
     )
 
-    fig = px.bar(plot_importance, x="Feature", y="Weight")
+    fig = px.bar(plot_importance, x="Feature", y="Weight", color = "Weight",
+                    color_continuous_scale=["red", "green"])
     st.plotly_chart(fig, use_container_width=True)
 
     st.markdown(
@@ -208,13 +216,30 @@ if option == "les graphiques de l'importance globale":
     st.write(" ")
     st.write(" ")
     st.write(
-        "Vous pouvez filtrer et agrandir le tableau ci-dessous pour connaître en détail l'importance de chaque variable"
+        "Vous pouvez filtrer et agrandir en plein écran le tableau ci-dessous pour connaître en détail l'importance de chaque variable"
     )
     st.dataframe(plot_importance, use_container_width=True)
+    
     st.markdown(
         "<h6 style='text-align: center; color: black;'> Tableau 2 : Tableau de l'importance globale des variables sur la prédiction </h6>",
         unsafe_allow_html=True,
     )
 
+hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            footer:after {
+                content:'Fait par Jessy PATRICE avec Streamlit'; 
+                visibility: visible;
+                display: block;
+                text-align: center;
+                #background-color: red;
+                padding: 5px;
+                top: 2px;
+            }
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
 
 # streamlit run myapp.py
