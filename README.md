@@ -19,5 +19,9 @@ Au sein d'une société financière, vous allez développer et implémenter un m
 - Présenter son travail de modélisation à l'oral
 - Déployer un modèle via une API dans le Web
 
+## Dashboard / API
+ - Streamlit
+ - FastApi
+
 ## API de Prédiction disponible ici : 
 https://streamlitpred.azurewebsites.net/
