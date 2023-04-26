@@ -1,0 +1,78 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy container app to Azure Web App - streamlitpred
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+
+  # TESTS
+  test:
+    runs-on: 'ubuntu-latest'
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install the dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: black - PEP8 code formatting
+      run: |
+        black frontend.py
+
+    - name: isort - Sort the librairies
+      run: |
+        isort frontend.py --profile=black
+
+    - name: flake8 - Linter
+      run: |
+        flake8 --extend-ignore=E501,E266,W293,W291
+
+  # CONTAINER BUILD      
+  build:
+    runs-on: 'ubuntu-latest'
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Log in to registry
+      uses: docker/login-action@v1
+      with:
+        registry: https://streamlitdeploy.azurecr.io/
+        username: ${{ secrets.AzureAppService_ContainerUsername_95e1bf9a28634ce8a827d02b810cd6ce }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_f674cb69eba74991a3469266d71db457 }}
+
+    - name: Build and push container image to registry
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        tags: streamlitdeploy.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_95e1bf9a28634ce8a827d02b810cd6ce }}/streamlitapp:${{ github.sha }}
+        file: ./Dockerfile
+
+  # DEPLOYMENT
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+    - name: Deploy to Azure Web App
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'streamlitpred'
+        slot-name: 'production'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_b5141819a56a482687acaf0968fe79af }}
+        images: 'streamlitdeploy.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_95e1bf9a28634ce8a827d02b810cd6ce }}/streamlitapp:${{ github.sha }}'
