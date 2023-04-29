@@ -20,8 +20,9 @@ Au sein d'une société financière, vous allez développer et implémenter un m
 - Déployer un modèle via une API dans le Web
 
 ## Dashboard / API
- - Streamlit
- - FastApi
+ - Frontend : Streamlit
+ - Backend : FastApi
+ - CI/CD : github/tests unitaires/Docker/Azure ML
 
 ## API de Prédiction disponible ici : 
 https://streamlitpred.azurewebsites.net/
